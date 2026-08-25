@@ -17,3 +17,32 @@ if (toggle && nav) {
     });
   });
 }
+
+async function loadSharpDonPhoto() {
+  const photos = document.querySelectorAll('.hero-photo, .story-photo');
+  if (!photos.length) return;
+
+  try {
+    const parts = await Promise.all(
+      Array.from({ length: 7 }, (_, index) =>
+        fetch(`assets/don-chunks/p${index + 1}.txt?v=8`, { cache: 'force-cache' })
+          .then(response => {
+            if (!response.ok) throw new Error(`Image chunk ${index + 1} failed`);
+            return response.text();
+          })
+      )
+    );
+
+    const base64 = parts.join('').replace(/\s+/g, '');
+    const sharpPhoto = `data:image/avif;base64,${base64}`;
+
+    photos.forEach(photo => {
+      photo.src = sharpPhoto;
+      photo.classList.add('sharp-photo-loaded');
+    });
+  } catch (error) {
+    console.error('Could not load the high-quality Don photo.', error);
+  }
+}
+
+loadSharpDonPhoto();
