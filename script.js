@@ -73,5 +73,15 @@ async function loadSharpDonPhoto() {
   }
 }
 
+function addFacebookLink() {
+  const contact = document.querySelector('#contact .contact-grid > div');
+  if (!contact || contact.querySelector('[data-facebook-link]')) return;
+
+  const row = document.createElement('p');
+  row.innerHTML = '<a class="outline-button" data-facebook-link href="https://www.facebook.com/share/193j78B3PP/" target="_blank" rel="noopener noreferrer">Follow us on Facebook <span>🐝</span></a>';
+  contact.appendChild(row);
+}
+
 loadOfficialLogo();
 loadSharpDonPhoto();
+addFacebookLink();
