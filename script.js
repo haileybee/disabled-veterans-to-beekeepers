@@ -18,6 +18,34 @@ if (toggle && nav) {
   });
 }
 
+async function loadOfficialLogo() {
+  const logos = document.querySelectorAll('[data-official-logo]');
+  if (!logos.length) return;
+
+  try {
+    const parts = await Promise.all(
+      Array.from({ length: 5 }, (_, index) =>
+        fetch(`assets/logo-chunks/l${index + 1}.txt?v=13`, { cache: 'no-cache' })
+          .then(response => {
+            if (!response.ok) throw new Error(`Logo chunk ${index + 1} failed`);
+            return response.text();
+          })
+      )
+    );
+
+    const base64 = parts.join('').replace(/\s+/g, '');
+    const officialLogo = `data:image/webp;base64,${base64}`;
+
+    logos.forEach(logo => {
+      logo.src = officialLogo;
+      logo.removeAttribute('width');
+      logo.removeAttribute('height');
+    });
+  } catch (error) {
+    console.error('Could not load the official logo.', error);
+  }
+}
+
 async function loadSharpDonPhoto() {
   const photos = document.querySelectorAll('.hero-photo, .story-photo');
   if (!photos.length) return;
@@ -45,4 +73,5 @@ async function loadSharpDonPhoto() {
   }
 }
 
+loadOfficialLogo();
 loadSharpDonPhoto();
