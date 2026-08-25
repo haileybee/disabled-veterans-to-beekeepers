@@ -47,7 +47,7 @@ async function loadOfficialLogo() {
 }
 
 async function loadSharpDonPhoto() {
-  const photos = document.querySelectorAll('.hero-photo, .story-photo');
+  const photos = document.querySelectorAll('.hero-photo');
   if (!photos.length) return;
 
   try {
