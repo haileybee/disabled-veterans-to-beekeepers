@@ -25,7 +25,7 @@ async function loadOfficialLogo() {
   try {
     const parts = await Promise.all(
       Array.from({ length: 5 }, (_, index) =>
-        fetch(`assets/logo-chunks/l${index + 1}.txt?v=13`, { cache: 'no-cache' })
+        fetch(`assets/logo-chunks/l${index + 1}.txt?v=18`, { cache: 'no-cache' })
           .then(response => {
             if (!response.ok) throw new Error(`Logo chunk ${index + 1} failed`);
             return response.text();
@@ -73,15 +73,5 @@ async function loadSharpDonPhoto() {
   }
 }
 
-function addFacebookLink() {
-  const contact = document.querySelector('#contact .contact-grid > div');
-  if (!contact || contact.querySelector('[data-facebook-link]')) return;
-
-  const row = document.createElement('p');
-  row.innerHTML = '<a class="outline-button" data-facebook-link href="https://www.facebook.com/share/193j78B3PP/" target="_blank" rel="noopener noreferrer">Follow us on Facebook <span>🐝</span></a>';
-  contact.appendChild(row);
-}
-
 loadOfficialLogo();
 loadSharpDonPhoto();
-addFacebookLink();
