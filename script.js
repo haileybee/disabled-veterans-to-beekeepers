@@ -19,7 +19,7 @@ async function loadOfficialLogo() {
   if (!logos.length) return;
   try {
     const parts = await Promise.all(Array.from({ length: 5 }, (_, index) =>
-      fetch(`assets/logo-chunks/l${index + 1}.txt?v=19`, { cache: 'no-store' }).then(r => {
+      fetch(`assets/logo-chunks/l${index + 1}.txt?v=21`, { cache: 'no-store' }).then(r => {
         if (!r.ok) throw new Error('logo chunk failed');
         return r.text();
       })
@@ -37,7 +37,7 @@ async function loadSharpDonPhoto() {
   if (!photos.length) return;
   try {
     const parts = await Promise.all(Array.from({ length: 7 }, (_, index) =>
-      fetch(`assets/don-chunks/p${index + 1}.txt?v=19`, { cache: 'force-cache' }).then(r => {
+      fetch(`assets/don-chunks/p${index + 1}.txt?v=21`, { cache: 'force-cache' }).then(r => {
         if (!r.ok) throw new Error('Don image chunk failed');
         return r.text();
       })
@@ -53,14 +53,14 @@ async function loadArticlePhoto() {
   const photos = document.querySelectorAll('[data-article-photo]');
   if (!photos.length) return;
   try {
-    const response = await fetch('assets/article-chunks/a1.txt?v=19', { cache: 'no-store' });
-    if (!response.ok) throw new Error('article chunk failed');
-    const raw = (await response.text()).trim();
-    if (raw.length < 100) throw new Error('article chunk is empty');
-    const src = raw.startsWith('data:image/') ? raw : `data:image/jpeg;base64,${raw.replace(/\s+/g, '')}`;
+    const response = await fetch('assets/article-inline.b64?v=21', { cache: 'no-store' });
+    if (!response.ok) throw new Error('article data failed');
+    const base64 = (await response.text()).replace(/\s+/g, '');
+    if (base64.length < 1000) throw new Error('article data too small');
+    const src = `data:image/jpeg;base64,${base64}`;
     photos.forEach(img => { img.src = src; });
   } catch (e) {
-    console.error('Full-resolution article loader unavailable; using image fallback.', e);
+    console.error('Article image failed to load.', e);
   }
 }
 
