@@ -1,0 +1,1 @@
+Replacing the broken article image with a normal JPEG asset generated from the three uploaded newspaper photos.
