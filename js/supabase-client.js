@@ -1,0 +1,4 @@
+let cachedClient;
+export function getSupabaseClient(){if(cachedClient)return cachedClient;const config=window.SITE_CONFIG||{};if(!config.SUPABASE_URL||!config.SUPABASE_PUBLISHABLE_KEY)throw new Error('Site database configuration is missing.');if(!window.supabase?.createClient)throw new Error('Supabase library failed to load.');cachedClient=window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return cachedClient;}
+export function edgeUrl(functionName){const base=String(window.SITE_CONFIG?.SUPABASE_URL||'').replace(/\/$/,'');return `${base}/functions/v1/${functionName}`;}
+export async function currentAccessToken(){const{data}=await getSupabaseClient().auth.getSession();return data.session?.access_token||'';}
