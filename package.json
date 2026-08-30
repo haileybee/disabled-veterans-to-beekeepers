@@ -2,6 +2,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/frontend/*.test.js"
+    "test": "node --check js/admin.js && node --check js/auth.js && node --check js/chat.js && node --check js/checkout.js && node --check js/store.js && node --test tests/frontend/*.test.js"
   }
 }
