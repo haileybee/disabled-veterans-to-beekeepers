@@ -4,3 +4,5 @@ window.SITE_CONFIG = Object.freeze({
   PAYPAL_CLIENT_ID: '',
   PAYPAL_CURRENCY: 'USD'
 });
+
+document.documentElement.classList.add('backend-paused');
