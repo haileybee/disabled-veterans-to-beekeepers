@@ -1,12 +1,12 @@
 import{getSupabaseClient}from'./supabase-client.js';
-import{getAdminState}from'./auth.js';
+import{getAdminState}from'./auth.js?v=52';
 
 const client=getSupabaseClient();
 let adminState=getAdminState();
 let editingStoryId=null;
 let storyRows=[];
 
-function escapeHtml(value=''){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function escapeHtml(value=''){return String(value).replace(/[&<>'\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]));}
 function publicImage(path){if(!path)return'';return client.storage.from('veterans-hive-story-images').getPublicUrl(path).data.publicUrl||'';}
 function formatDate(value){if(!value)return'No story date';const date=new Date(`${value}T12:00:00`);return Number.isNaN(date.getTime())?value:date.toLocaleDateString();}
 
@@ -26,5 +26,5 @@ async function saveStory(event){event.preventDefault();const form=event.currentT
 async function deleteStory(id){const story=storyRows.find(s=>s.id===id);if(!story||!confirm(`Delete “${story.title}”?`))return;const{error}=await client.from('veterans_hive_stories').delete().eq('id',id);if(error){alert(error.message);return;}await removePhoto(story.image_path);if(editingStoryId===id)editingStoryId=null;await loadAdminStories();window.dispatchEvent(new CustomEvent('veterans-hive-stories-updated'));}
 
 function syncState(state){adminState=state;const host=document.getElementById('hive-admin-tools');if(!host)return;if(adminState.approved)loadAdminStories();else host.innerHTML='';}
+export async function openHiveAdmin(){adminState=getAdminState();if(adminState.approved)await loadAdminStories();}
 window.addEventListener('admin-state-changed',event=>syncState(event.detail));
-if(adminState.approved)loadAdminStories();
