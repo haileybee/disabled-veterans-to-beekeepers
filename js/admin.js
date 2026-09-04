@@ -1,5 +1,5 @@
 import{currentAccessToken,edgeUrl,getSupabaseClient}from'./supabase-client.js';
-import{getAdminState}from'./auth.js?v=53';
+import{getAdminState}from'./auth.js?v=54';
 import{openHiveAdmin}from'./hive-admin.js?v=52';
 const client=getSupabaseClient();
 let adminState=getAdminState();
