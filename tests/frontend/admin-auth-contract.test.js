@@ -7,7 +7,7 @@ const admin=fs.readFileSync(new URL('../../js/admin.js',import.meta.url),'utf8')
 const html=fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8');
 const adminCss=fs.readFileSync(new URL('../../css/admin-fix.css',import.meta.url),'utf8');
 
-test('admin auth returns to production site instead of localhost',()=>{
+test('admin auth is tied to the production site',()=>{
   assert.match(auth,/https:\/\/haileybee\.github\.io\/disabled-veterans-to-beekeepers\//);
   assert.doesNotMatch(auth,/localhost:3000/);
 });
@@ -33,11 +33,13 @@ test('public admin gate uses a discreet signed-out prompt',()=>{
   assert.match(auth,/admin-gate-card discreet/);
 });
 
-test('private management introduction unlocks only for approved admins',()=>{
+test('private management introduction unlocks only for approved admins after password setup',()=>{
   assert.match(html,/<p class="eyebrow">Private Management<\/p>/);
   assert.match(html,/<h2>Owner & Admin<\/h2>/);
-  assert.match(auth,/admin-unlocked/);
-  assert.match(auth,/classList\.toggle\(['"]admin-unlocked['"],adminState\.approved\)/);
+  assert.match(auth,/passwordChangeRequired/);
+  assert.match(auth,/const unlocked=adminState\.approved&&!adminState\.passwordChangeRequired/);
+  assert.match(auth,/classList\.toggle\(['"]admin-unlocked['"],unlocked\)/);
+  assert.match(admin,/adminState\.approved&&!adminState\.passwordChangeRequired/);
   assert.match(adminCss,/\.admin-section\s+\.feature-intro\{display:none/);
   assert.match(adminCss,/\.admin-section\.admin-unlocked\s+\.feature-intro\{display:block/);
 });
