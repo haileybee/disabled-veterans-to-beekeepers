@@ -6,10 +6,18 @@ const auth=fs.readFileSync(new URL('../../js/auth.js',import.meta.url),'utf8');
 const admin=fs.readFileSync(new URL('../../js/admin.js',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8');
 const adminCss=fs.readFileSync(new URL('../../css/admin-fix.css',import.meta.url),'utf8');
+const adminLoginEdge=fs.readFileSync(new URL('../../supabase/functions/veterans-admin-login/index.ts',import.meta.url),'utf8');
 
 test('admin auth is tied to the production site',()=>{
   assert.match(auth,/https:\/\/haileybee\.github\.io\/disabled-veterans-to-beekeepers\//);
   assert.doesNotMatch(auth,/localhost:3000/);
+});
+
+test('admin approval is resolved server-side without an auth refresh loop',()=>{
+  assert.match(auth,/action:'status'/);
+  assert.match(adminLoginEdge,/action === "status"/);
+  assert.match(auth,/event==='TOKEN_REFRESHED'/);
+  assert.doesNotMatch(auth,/queueMicrotask/);
 });
 
 test('admin dashboard exposes owner management tools',()=>{
