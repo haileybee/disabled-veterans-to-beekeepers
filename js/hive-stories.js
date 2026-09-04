@@ -1,6 +1,6 @@
 import{getSupabaseClient}from'./supabase-client.js';
 const client=getSupabaseClient();
-function escapeHtml(value=''){return String(value).replace(/[&<>'\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]));}
+function escapeHtml(value=''){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function formatDate(value){if(!value)return'';const date=new Date(`${value}T12:00:00`);return Number.isNaN(date.getTime())?'':date.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});}
 function publicImage(path){if(!path)return'';return client.storage.from('veterans-hive-story-images').getPublicUrl(path).data.publicUrl||'';}
 function card(story){const image=publicImage(story.image_path);const meta=[story.hive_name,story.location,formatDate(story.story_date)].filter(Boolean);const intro=story.excerpt||story.body.slice(0,220)+(story.body.length>220?'…':'');return`<article class="hive-story-card">${image?`<div class="hive-story-photo"><img src="${escapeHtml(image)}" alt="${escapeHtml(story.title)}"></div>`:`<div class="hive-story-photo hive-story-photo-placeholder"><span>Hive Story</span></div>`}<div class="hive-story-copy"><h3>${escapeHtml(story.title)}</h3>${meta.length?`<div class="hive-story-meta">${meta.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div>`:''}<p>${escapeHtml(intro)}</p><details><summary>Read the full hive story</summary><p class="hive-story-full">${escapeHtml(story.body)}</p></details></div></article>`;}
