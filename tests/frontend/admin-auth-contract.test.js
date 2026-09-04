@@ -27,19 +27,19 @@ test('index loads one admin module entrypoint',()=>{
   assert.doesNotMatch(html,/js\/hive-admin\.js\?v=/);
 });
 
-test('public admin area stays discreet before sign in',()=>{
-  assert.doesNotMatch(html,/<p class="eyebrow">Private Management<\/p>/);
-  assert.doesNotMatch(html,/<h2>Owner & Admin<\/h2>/);
+test('public admin gate uses a discreet signed-out prompt',()=>{
   assert.match(auth,/Admin Sign In/);
   assert.match(auth,/Authorized staff only\./);
   assert.match(auth,/admin-gate-card discreet/);
 });
 
-test('private management heading appears only in approved admin state',()=>{
-  assert.match(auth,/Private Management/);
-  assert.match(auth,/Owner & Admin/);
-  assert.match(auth,/manage products, orders, Hive Stories, community tools, and approved emails/);
+test('private management introduction unlocks only for approved admins',()=>{
+  assert.match(html,/<p class="eyebrow">Private Management<\/p>/);
+  assert.match(html,/<h2>Owner & Admin<\/h2>/);
   assert.match(auth,/admin-unlocked/);
+  assert.match(auth,/classList\.toggle\(['"]admin-unlocked['"],adminState\.approved\)/);
+  assert.match(adminCss,/\.admin-section\s+\.feature-intro\{display:none/);
+  assert.match(adminCss,/\.admin-section\.admin-unlocked\s+\.feature-intro\{display:block/);
 });
 
 test('discreet admin styles keep signed-out gate compact',()=>{
