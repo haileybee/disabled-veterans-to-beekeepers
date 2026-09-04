@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/community-store-admin
+      - fix/connect-dedicated-veterans-chat
   pull_request:
     branches:
       - main
