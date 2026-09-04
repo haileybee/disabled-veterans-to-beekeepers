@@ -6,7 +6,7 @@ let adminState=getAdminState();
 let editingStoryId=null;
 let storyRows=[];
 
-function escapeHtml(value=''){return String(value).replace(/[&<>'\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]));}
+function escapeHtml(value=''){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function publicImage(path){if(!path)return'';return client.storage.from('veterans-hive-story-images').getPublicUrl(path).data.publicUrl||'';}
 function formatDate(value){if(!value)return'No story date';const date=new Date(`${value}T12:00:00`);return Number.isNaN(date.getTime())?value:date.toLocaleDateString();}
 
