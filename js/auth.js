@@ -3,7 +3,7 @@ const client=getSupabaseClient();
 let adminState={user:null,approved:false,role:null,adminId:null};
 export function normalizeEmail(value=''){return String(value).trim().toLowerCase();}
 export function getAdminState(){return{...adminState};}
-function escapeHtml(value){return String(value).replace(/[&<>'\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]));}
+function escapeHtml(value){return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function redirectUrl(){return`${location.origin}${location.pathname}#admin`;}
 export function renderAdminGate(state){
   if(!state.user)return`<div class="admin-gate-card"><div><h3>Owner & Admin Sign In</h3><p>Site management is restricted to approved owner and admin emails.</p><form id="admin-email-form" class="admin-email-form"><label>Email<input name="email" type="email" autocomplete="email" required placeholder="approved@email.com"></label><button class="gold-cta compact" type="submit">Email Me a Sign-In Link</button><p id="admin-email-status" class="admin-form-status"></p></form><button class="outline-button" type="button" data-google-signin>Or sign in with Google</button></div></div>`;
