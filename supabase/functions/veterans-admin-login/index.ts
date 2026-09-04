@@ -84,6 +84,15 @@ async function ensureApproved(admin: ReturnType<typeof createClient>, email: str
   return data;
 }
 
+async function getAuthenticatedUser(req: Request, admin: ReturnType<typeof createClient>) {
+  const authorization = req.headers.get("authorization") || "";
+  const token = authorization.replace(/^Bearer\s+/i, "").trim();
+  if (!token) return { token: "", user: null };
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data.user) return { token, user: null };
+  return { token, user: data.user };
+}
+
 async function genericFailure(req: Request) {
   await new Promise((resolve) => setTimeout(resolve, 260));
   return json(req, { error: "Invalid username or password." }, 401);
@@ -114,14 +123,21 @@ Deno.serve(async (req: Request) => {
     const config = await readLoginConfig(admin);
     if (!config.username || !config.email) return json(req, { error: "Admin login is not configured." }, 500);
 
-    if (action === "password_changed") {
-      const authorization = req.headers.get("authorization") || "";
-      const token = authorization.replace(/^Bearer\s+/i, "").trim();
-      if (!token) return json(req, { error: "Please sign in again." }, 401);
+    if (action === "status") {
+      const { user } = await getAuthenticatedUser(req, admin);
+      if (!user?.email) return json(req, { error: "Your sign-in session is invalid or expired." }, 401);
+      const approved = await ensureApproved(admin, normalizeEmail(user.email));
+      return json(req, {
+        approved: Boolean(approved),
+        role: approved?.role || null,
+        admin_id: approved?.id || null,
+        password_change_required: Boolean(user.app_metadata?.veterans_password_change_required),
+      });
+    }
 
-      const { data: userData, error: userError } = await admin.auth.getUser(token);
-      const user = userData.user;
-      if (userError || !user?.email || normalizeEmail(user.email) !== config.email) {
+    if (action === "password_changed") {
+      const { user } = await getAuthenticatedUser(req, admin);
+      if (!user?.email || normalizeEmail(user.email) !== config.email) {
         return json(req, { error: "Your sign-in session is invalid or expired." }, 401);
       }
       const approved = await ensureApproved(admin, config.email);
@@ -158,6 +174,8 @@ Deno.serve(async (req: Request) => {
         access_token: direct.data.session.access_token,
         refresh_token: direct.data.session.refresh_token,
         must_change_password: Boolean(direct.data.user?.app_metadata?.veterans_password_change_required),
+        role: approved.role,
+        admin_id: approved.id,
       });
     }
 
@@ -190,6 +208,8 @@ Deno.serve(async (req: Request) => {
       access_token: verified.data.session.access_token,
       refresh_token: verified.data.session.refresh_token,
       must_change_password: true,
+      role: approved.role,
+      admin_id: approved.id,
     });
   } catch (error) {
     console.error(error instanceof Error ? error.message : "Admin login failed");
