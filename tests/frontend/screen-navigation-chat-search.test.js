@@ -7,25 +7,47 @@ const html=fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8');
 const router=fs.readFileSync(new URL('../../js/screen-navigation.js',import.meta.url),'utf8');
 const admin=fs.readFileSync(new URL('../../js/admin.js',import.meta.url),'utf8');
 
-const screenIds=['home','about','story','hive-stories','mission','shop','community','support','contact','admin'];
+const screenIds=['home','about','story','hive-stories','shop','community','contact','admin'];
 
-test('site has dedicated isolated screens and approved Home story',()=>{
+test('site keeps isolated top-level screens with Mission and Support folded into Home',()=>{
   for(const id of screenIds)assert.match(html,new RegExp(`<section[^>]*id="${id}"[^>]*data-site-screen`));
+  assert.doesNotMatch(html,/<section[^>]*id="mission"[^>]*data-site-screen/);
+  assert.doesNotMatch(html,/<section[^>]*id="support"[^>]*data-site-screen/);
+  const nav=html.match(/<nav class="site-nav"[\s\S]*?<\/nav>/)?.[0]||'';
+  assert.doesNotMatch(nav,/href="#mission"/);
+  assert.doesNotMatch(nav,/href="#support"/);
+  assert.match(html,/id="mission"[^>]*data-home-section/);
+  assert.match(html,/id="support"[^>]*data-home-section/);
+});
+
+test('Home keeps Donald text and uses PayPal buttons instead of a raw donation URL',()=>{
   assert.match(html,/Help Disabled Veterans Find Purpose Through Beekeeping/);
   assert.match(html,/Hello, my name is Donald Schafer, and I’m a disabled U\.S\. Veteran and proud owner of Schafer Farms\./);
   assert.match(html,/This isn’t just a fundraiser — it’s a movement\. A mission\. A chance to give veterans their purpose back and help the earth heal in the process\./);
+  assert.match(html,/Donate With PayPal/);
   assert.match(html,/business=E6Y3STY5WYUGU/);
+  assert.doesNotMatch(html,/class="home-paypal-link"/);
   assert.doesNotMatch(html,/gofund/i);
-  assert.match(html,/js\/screen-navigation\.js\?v=/);
-  assert.match(html,/css\/screen-navigation\.css\?v=/);
 });
 
-test('screen router supports hidden-state isolation, active nav, and browser history',()=>{
+test('About Don contains the full on-site story and keeps the original article as a source',()=>{
+  assert.match(html,/Keeper of the Bees/);
+  assert.match(html,/20-acre farm/);
+  assert.match(html,/starter beekeeping kits/);
+  assert.match(html,/veteran beekeeping network/);
+  assert.match(html,/Source: Sweet Mountain Farm/);
+  assert.match(html,/sweetmountainfarm\.com\/index\.php\/new\/up-veteran-beekeeper/);
+  assert.doesNotMatch(html,/Read Don's Story/);
+});
+
+test('screen router supports hidden-state isolation, active nav, browser history, and legacy Home anchors',()=>{
   assert.match(router,/\.hidden=/);
   assert.match(router,/aria-current/);
   assert.match(router,/hashchange/);
   assert.match(router,/popstate/);
   assert.match(router,/history\.replaceState/);
+  assert.match(router,/homeSectionIds/);
+  assert.match(router,/scrollIntoView/);
 });
 
 test('chat search matches display name or message text only',()=>{
