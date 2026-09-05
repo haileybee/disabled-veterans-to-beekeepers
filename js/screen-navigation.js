@@ -1,13 +1,12 @@
 const screens=Array.from(document.querySelectorAll('[data-site-screen]'));
 const navLinks=Array.from(document.querySelectorAll('.site-nav a[href^="#"]'));
 const screenIds=new Set(screens.map(screen=>screen.id));
+const homeSectionIds=new Set(Array.from(document.querySelectorAll('[data-home-section]')).map(section=>section.id));
 
-function screenFromHash(){
-  const requested=String(location.hash||'').replace(/^#/,'');
-  return screenIds.has(requested)?requested:'home';
-}
+function requestedHash(){return String(location.hash||'').replace(/^#/,'');}
+function screenFromHash(){const requested=requestedHash();if(screenIds.has(requested))return requested;if(homeSectionIds.has(requested))return'home';return'home';}
 
-function setActiveScreen(id,{scroll=true}={}){
+function setActiveScreen(id,{scroll=true,anchorId=null}={}){
   const activeId=screenIds.has(id)?id:'home';
   screens.forEach(screen=>{screen.hidden=screen.id!==activeId;});
   navLinks.forEach(link=>{
@@ -16,22 +15,30 @@ function setActiveScreen(id,{scroll=true}={}){
     else link.removeAttribute('aria-current');
   });
   document.body.dataset.activeScreen=activeId;
-  if(scroll)window.scrollTo({top:0,left:0,behavior:'auto'});
+  if(!scroll)return;
+  if(anchorId&&homeSectionIds.has(anchorId)){
+    requestAnimationFrame(()=>document.getElementById(anchorId)?.scrollIntoView({behavior:'auto',block:'start'}));
+  }else{
+    window.scrollTo({top:0,left:0,behavior:'auto'});
+  }
 }
 
 function syncFromLocation(){
-  const requested=String(location.hash||'').replace(/^#/,'');
+  const requested=requestedHash();
   const activeId=screenFromHash();
-  if(requested&&requested!==activeId){
-    history.replaceState(null,'',`${location.pathname}${location.search}#${activeId}`);
+  const homeAnchor=homeSectionIds.has(requested)?requested:null;
+  if(requested&&!screenIds.has(requested)&&!homeAnchor){
+    history.replaceState(null,'',`${location.pathname}${location.search}#home`);
   }
-  setActiveScreen(activeId);
+  setActiveScreen(activeId,{anchorId:homeAnchor});
 }
 
 document.querySelectorAll('a[href^="#"]').forEach(link=>{
   link.addEventListener('click',()=>{
     const id=String(link.getAttribute('href')||'').replace(/^#/,'');
-    if(screenIds.has(id)&&location.hash===`#${id}`)setActiveScreen(id);
+    if(location.hash!==`#${id}`)return;
+    if(screenIds.has(id))setActiveScreen(id);
+    else if(homeSectionIds.has(id))setActiveScreen('home',{anchorId:id});
   });
 });
 
